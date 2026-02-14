@@ -6,107 +6,75 @@ export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  // Function to register a new user
+
   const createUser = async (userData) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, userData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, userData, {
         withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { "Content-Type": "application/json" },
       });
-      
-      if (response.data.success) {
-        // Set user data after successful registration
-        setUser(response.data.user);
-        return response.data;
-      }
+      if (res.data.success) setUser(res.data.user);
+      return res.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
 
-  // Function to login user
   const signIn = async (email, password) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, {
-        email,
-        password
-      }, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password }, {
         withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { "Content-Type": "application/json" },
       });
-      
-      if (response.data.success) {
-        setUser(response.data.user);
-        return response.data;
-      }
+      if (res.data.success) setUser(res.data.user);
+      return res.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
 
-  // Function to get current user
   const getCurrentUser = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
-        withCredentials: true,
-      });
-      
-      if (response.data.success) {
-        setUser(response.data.user);
-        return response.data.user;
-      }
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, { withCredentials: true });
+      if (res.data.success) setUser(res.data.user);
+      return res.data.user;
     } catch (error) {
-      console.error('Error getting current user:', error);
+      // 401 is expected when no session exists - silently handle it
+      if (error.response?.status === 401) {
+        // No active session, this is normal
+        setUser(null);
+        return null;
+      }
+      // For other errors, still set user to null but don't log
       setUser(null);
+      return null;
     }
   };
 
-  // Function to logout user
   const logOut = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/logout`, {}, {
-        withCredentials: true,
-      });
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/logout`, {}, { withCredentials: true });
       setUser(null);
-    } catch (error) {
-      console.error('Error during logout:', error);
+    } catch (_) {
       setUser(null);
     }
   };
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      try {
-        // Try to get current user to check if session exists
-        await getCurrentUser();
-      } catch (error) {
-        console.error('No active session:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+      // Check if user has an active session on app load
+      await getCurrentUser();
+      setLoading(false);
     };
-
+    
     checkAuthStatus();
   }, []);
 
-  const authInfo = {
-    user,
-    loading,
-    createUser,
-    signIn,
-    logOut,
-    getCurrentUser,
-  };
-
   return (
-    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, loading, createUser, signIn, logOut, getCurrentUser }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-export default AuthProvider;
+export { AuthProvider }

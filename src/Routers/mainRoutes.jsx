@@ -1,11 +1,11 @@
-import { createBrowserRouter } from "react-router";
-import RootLayout from "../layouts/RootLayout";
+import { createBrowserRouter } from "react-router-dom"; 
 import LoginPage from "../pages/auth/LoginPage";
 import NotFoundPage from "../pages/auth/NotFoundPage";
 import RegistrationPage from "../pages/auth/RegistrationPage";
-import Home from "../Home";
 import PrivateRoute from "./PrivateRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
+import RootLayout from "../layouts/RootLayout";
+import Home from "../Home";
 
 const mainRoutes = createBrowserRouter([
   {
@@ -15,7 +15,7 @@ const mainRoutes = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home></Home>,
+        element: <Home></Home>
       },
       {
         path: "/dashboard",
