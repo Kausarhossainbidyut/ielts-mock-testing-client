@@ -2,9 +2,8 @@ import { Outlet, Link } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../Provider/AuthProvider";
 import Swal from "sweetalert2";
-import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 
-const DashboardLayout = () => {
+const AdminLayout = () => {
   const { user, logOut } = useContext(AuthContext);
 
   const handleLogout = () => {
@@ -30,10 +29,21 @@ const DashboardLayout = () => {
     });
   };
 
+  const menuItems = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/admin/tests', label: 'Test Management', icon: '📝' },
+    { path: '/admin/questions', label: 'Question Management', icon: '❓' },
+    { path: '/admin/users', label: 'User Management', icon: '👥' },
+    { path: '/admin/audio', label: 'Audio Upload', icon: '🎵' },
+    { path: '/admin/resources', label: 'Resource Upload', icon: '📁' },
+    { path: '/admin/analytics', label: 'Result Analytics', icon: '📈' },
+    { path: '/admin/reports', label: 'Performance Reports', icon: '📄' },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Top Navigation Bar */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
+      <header className="bg-gradient-to-r from-gray-800 to-gray-900 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -44,18 +54,18 @@ const DashboardLayout = () => {
                   <span className="text-white font-bold text-xs">IELTS</span>
                 </div>
               </div>
-              <span className="text-xl font-bold text-gray-800 hidden sm:block">User Dashboard</span>
+              <span className="text-xl font-bold text-white hidden sm:block">Admin Panel</span>
             </Link>
 
             {/* User Info & Actions */}
             <div className="flex items-center space-x-4">
               <div className="hidden md:flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                  {user?.name?.charAt(0) || user?.email?.charAt(0) || 'A'}
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-800">{user?.name || 'User'}</p>
-                  <p className="text-xs text-gray-500">{user?.email || 'user@example.com'}</p>
+                  <p className="text-sm font-semibold text-white">{user?.name || 'Admin'}</p>
+                  <p className="text-xs text-gray-400">Administrator</p>
                 </div>
               </div>
               
@@ -78,10 +88,31 @@ const DashboardLayout = () => {
         <aside className="w-72 bg-white shadow-xl min-h-screen hidden md:block">
           <div className="p-6">
             <div className="text-lg font-bold text-gray-800 mb-6 flex items-center space-x-2">
-              <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></span>
-              <span>Menu</span>
+              <span className="w-2 h-8 bg-gradient-to-b from-yellow-500 to-orange-500 rounded-full"></span>
+              <span>Admin Menu</span>
             </div>
-            <DashboardSidebar />
+            <nav className="space-y-2">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 hover:text-orange-600"
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              ))}
+              
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <Link
+                  to="/"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                >
+                  <span className="text-xl">🏠</span>
+                  <span className="font-medium">Back to Home</span>
+                </Link>
+              </div>
+            </nav>
           </div>
         </aside>
 
@@ -96,4 +127,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default AdminLayout;
