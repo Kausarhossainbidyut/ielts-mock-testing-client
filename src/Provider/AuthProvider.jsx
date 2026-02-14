@@ -39,15 +39,7 @@ const AuthProvider = ({ children }) => {
       if (res.data.success) setUser(res.data.user);
       return res.data.user;
     } catch (error) {
-      // 401 is expected when no session exists - silently handle it
-      if (error.response?.status === 401) {
-        // No active session, this is normal
-        setUser(null);
-        return null;
-      }
-      // For other errors, still set user to null but don't log
       setUser(null);
-      return null;
     }
   };
 
@@ -55,19 +47,18 @@ const AuthProvider = ({ children }) => {
     try {
       await axios.post(`${import.meta.env.VITE_API_URL}/auth/logout`, {}, { withCredentials: true });
       setUser(null);
-    } catch (_) {
+    } catch (error) {
       setUser(null);
     }
   };
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      // Check if user has an active session on app load
-      await getCurrentUser();
-      setLoading(false);
+    const checkAuth = async () => {
+      try { await getCurrentUser(); } 
+      catch { setUser(null); } 
+      finally { setLoading(false); }
     };
-    
-    checkAuthStatus();
+    checkAuth();
   }, []);
 
   return (
@@ -77,4 +68,4 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-export { AuthProvider }
+export default AuthProvider
