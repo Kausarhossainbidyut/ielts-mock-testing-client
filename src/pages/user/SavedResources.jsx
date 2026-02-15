@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { userDashboardAPI } from '../../utils/api';
+import { userAPI } from '../../utils/api';
 
 const SavedResources = () => {
   const [resources, setResources] = useState([]);
@@ -9,7 +9,7 @@ const SavedResources = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const savedRes = await userDashboardAPI.getSavedResources().catch(() => ({ data: null }));
+        const savedRes = await userAPI.getSavedResources().catch(() => ({ data: null }));
         
         if (savedRes.data?.success) {
           setResources(savedRes.data.data || []);

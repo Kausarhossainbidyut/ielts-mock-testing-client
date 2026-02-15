@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { userDashboardAPI, resultsAPI } from '../../utils/api';
+import { userAPI, resultsAPI } from '../../utils/api';
 
 const Progress = () => {
   const [progressData, setProgressData] = useState([]);
@@ -12,7 +12,7 @@ const Progress = () => {
         setLoading(true);
         
         const [analyticsRes, resultsRes] = await Promise.all([
-          userDashboardAPI.getAnalytics().catch(() => ({ data: null })),
+          userAPI.getAnalytics().catch(() => ({ data: null })),
           resultsAPI.getMyResults().catch(() => ({ data: null }))
         ]);
         

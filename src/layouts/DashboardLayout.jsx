@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import { useContext } from "react";
-import { AuthContext } from "../Provider/AuthProvider";
+import { AuthContext } from "../contexts/AuthContext";
 import Swal from "sweetalert2";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 

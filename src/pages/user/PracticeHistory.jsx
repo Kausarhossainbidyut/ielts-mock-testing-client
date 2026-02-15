@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { userDashboardAPI, resultsAPI } from '../../utils/api';
+import { userAPI, resultsAPI } from '../../utils/api';
 
 const PracticeHistory = () => {
   const [history, setHistory] = useState([]);
@@ -11,7 +11,7 @@ const PracticeHistory = () => {
         setLoading(true);
         
         const [practiceRes, resultsRes] = await Promise.all([
-          userDashboardAPI.getPracticeHistory().catch(() => ({ data: null })),
+          userAPI.getPracticeHistory().catch(() => ({ data: null })),
           resultsAPI.getMyResults().catch(() => ({ data: null }))
         ]);
         

@@ -150,7 +150,9 @@ const MyTests = () => {
                   </td>
                   <td className="px-6 py-4">
                     <Link 
-                      to={`/test/${test._id || test.id}`}
+                      to={(test.type || test.category) && ['listening', 'reading', 'writing', 'speaking'].includes((test.type || test.category).toLowerCase())
+                        ? `/test/${(test.type || test.category).toLowerCase()}/${test._id || test.id}`
+                        : `/test/${test._id || test.id}`}
                       className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-700 transition-all"
                     >
                       Start

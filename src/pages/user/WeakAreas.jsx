@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { userDashboardAPI } from '../../utils/api';
+import { userAPI } from '../../utils/api';
 
 const WeakAreas = () => {
   const [weakAreas, setWeakAreas] = useState([]);
@@ -9,7 +9,7 @@ const WeakAreas = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const analyticsRes = await userDashboardAPI.getAnalytics().catch(() => ({ data: null }));
+        const analyticsRes = await userAPI.getAnalytics().catch(() => ({ data: null }));
         
         if (analyticsRes.data?.success) {
           setWeakAreas(analyticsRes.data.data?.weakAreas || []);

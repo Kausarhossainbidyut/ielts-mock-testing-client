@@ -8,6 +8,18 @@ import AdminLayout from "../layouts/AdminLayout";
 import RootLayout from "../layouts/RootLayout";
 import Home from "../Home";
 
+// Public Pages
+import TestsPage from "../pages/public/TestsPage";
+import TipsPage from "../pages/public/TipsPage";
+import ResourcesPage from "../pages/public/ResourcesPage";
+
+// Test Module
+import TestPage from "../pages/test-modules/TestPage";
+import ListeningTest from "../pages/test-modules/ListeningTest";
+import ReadingTest from "../pages/test-modules/ReadingTest";
+import WritingTest from "../pages/test-modules/WritingTest";
+import SpeakingTest from "../pages/test-modules/SpeakingTest";
+
 // User Dashboard Pages
 import MyTests from "../pages/user/MyTests";
 import MyResults from "../pages/user/MyResults";
@@ -35,6 +47,40 @@ const mainRoutes = createBrowserRouter([
       {
         path: "/",
         element: <Home></Home>
+      },
+      // Public Pages
+      {
+        path: "/tests",
+        element: <TestsPage />
+      },
+      {
+        path: "/tips",
+        element: <TipsPage />
+      },
+      {
+        path: "/resources",
+        element: <ResourcesPage />
+      },
+      // Test Taking Pages
+      {
+        path: "/test/:id",
+        element: <PrivateRoute><TestPage /></PrivateRoute>
+      },
+      {
+        path: "/test/listening/:id",
+        element: <PrivateRoute><ListeningTest /></PrivateRoute>
+      },
+      {
+        path: "/test/reading/:id",
+        element: <PrivateRoute><ReadingTest /></PrivateRoute>
+      },
+      {
+        path: "/test/writing/:id",
+        element: <PrivateRoute><WritingTest /></PrivateRoute>
+      },
+      {
+        path: "/test/speaking/:id",
+        element: <PrivateRoute><SpeakingTest /></PrivateRoute>
       },
       // User Dashboard Routes
       {

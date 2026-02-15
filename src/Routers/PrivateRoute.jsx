@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { AuthContext } from "../Provider/AuthProvider.jsx";
+import { AuthContext } from "../contexts/AuthContext";
 
 /**
  * Single PrivateRoute component that handles role-based access
