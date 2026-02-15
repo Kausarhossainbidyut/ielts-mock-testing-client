@@ -12,6 +12,14 @@ import Home from "../Home";
 import TestsPage from "../pages/public/TestsPage";
 import TipsPage from "../pages/public/TipsPage";
 import ResourcesPage from "../pages/public/ResourcesPage";
+import BandScoreGuide from "../pages/public/BandScoreGuide";
+import SampleAnswers from "../pages/public/SampleAnswers";
+import FAQ from "../pages/public/FAQ";
+import About from "../pages/public/About";
+import Contact from "../pages/public/Contact";
+import Careers from "../pages/public/Careers";
+import Privacy from "../pages/public/Privacy";
+import Terms from "../pages/public/Terms";
 
 // Test Module
 import TestPage from "../pages/test-modules/TestPage";
@@ -78,6 +86,38 @@ const mainRoutes = createBrowserRouter([
       {
         path: "/resources",
         element: <ResourcesPage />
+      },
+      {
+        path: "/band-score-guide",
+        element: <BandScoreGuide />
+      },
+      {
+        path: "/sample-answers",
+        element: <SampleAnswers />
+      },
+      {
+        path: "/faq",
+        element: <FAQ />
+      },
+      {
+        path: "/about",
+        element: <About />
+      },
+      {
+        path: "/contact",
+        element: <Contact />
+      },
+      {
+        path: "/careers",
+        element: <Careers />
+      },
+      {
+        path: "/privacy",
+        element: <Privacy />
+      },
+      {
+        path: "/terms",
+        element: <Terms />
       },
       // Test Taking Pages
       {

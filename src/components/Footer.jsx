@@ -164,28 +164,28 @@ const Footer = () => {
                                 </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/band-score-guide" className="text-gray-400 hover:text-indigo-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     Band Score Guide
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/sample-answers" className="text-gray-400 hover:text-indigo-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     Sample Answers
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/faq" className="text-gray-400 hover:text-indigo-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     FAQ
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
@@ -198,44 +198,44 @@ const Footer = () => {
                         </h3>
                         <ul className="space-y-3">
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/about" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     About Us
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/contact" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     Contact
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/careers" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     Careers
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/privacy" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     Privacy Policy
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
+                                <Link to="/terms" className="text-gray-400 hover:text-purple-400 transition-colors duration-200 flex items-center group">
                                     <svg className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                     Terms of Service
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
@@ -250,9 +250,9 @@ const Footer = () => {
                             © 2026 <span className="text-blue-400 font-semibold">IELTS Smart Practice</span>. All rights reserved.
                         </p>
                         <div className="flex space-x-6 mt-4 md:mt-0">
-                            <a href="#" className="text-gray-500 hover:text-white text-sm transition-colors">Privacy</a>
-                            <a href="#" className="text-gray-500 hover:text-white text-sm transition-colors">Terms</a>
-                            <a href="#" className="text-gray-500 hover:text-white text-sm transition-colors">Cookies</a>
+                            <Link to="/privacy" className="text-gray-500 hover:text-white text-sm transition-colors">Privacy</Link>
+                            <Link to="/terms" className="text-gray-500 hover:text-white text-sm transition-colors">Terms</Link>
+                            <span className="text-gray-500 text-sm">Cookies</span>
                         </div>
                     </div>
                 </div>
