@@ -33,6 +33,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import TestManagement from "../pages/admin/TestManagement";
 import UserManagement from "../pages/admin/UserManagement";
 import Analytics from "../pages/admin/Analytics";
+import ResourceManagement from "../pages/admin/ResourceManagement";
 
 const mainRoutes = createBrowserRouter([
   {
@@ -168,7 +169,7 @@ const mainRoutes = createBrowserRouter([
           },
           {
             path: "resources",
-            element: <AdminDashboard />
+            element: <ResourceManagement />
           },
           {
             path: "analytics",
