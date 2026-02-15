@@ -1,60 +1,37 @@
+import { useState, useEffect } from 'react';
+import { userDashboardAPI } from '../../utils/api';
+
 const SavedResources = () => {
-  const resources = [
-    { 
-      id: 1, 
-      title: 'IELTS Writing Task 2 - Sample Essays', 
-      type: 'PDF',
-      category: 'Writing',
-      savedDate: '2026-02-10',
-      size: '2.5 MB',
-      downloads: 156
-    },
-    { 
-      id: 2, 
-      title: 'Speaking Cue Cards - Part 2 Topics', 
-      type: 'PDF',
-      category: 'Speaking',
-      savedDate: '2026-02-08',
-      size: '1.8 MB',
-      downloads: 89
-    },
-    { 
-      id: 3, 
-      title: 'Listening Practice Audio - Section 1-4', 
-      type: 'Audio',
-      category: 'Listening',
-      savedDate: '2026-02-05',
-      size: '45 MB',
-      downloads: 234
-    },
-    { 
-      id: 4, 
-      title: 'Reading Passages Collection', 
-      type: 'PDF',
-      category: 'Reading',
-      savedDate: '2026-02-03',
-      size: '3.2 MB',
-      downloads: 112
-    },
-    { 
-      id: 5, 
-      title: 'Band 9 Vocabulary List', 
-      type: 'PDF',
-      category: 'Vocabulary',
-      savedDate: '2026-02-01',
-      size: '0.5 MB',
-      downloads: 567
-    },
-    { 
-      id: 6, 
-      title: 'Grammar for IELTS', 
-      type: 'Video',
-      category: 'Grammar',
-      savedDate: '2026-01-28',
-      size: '120 MB',
-      downloads: 89
-    },
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const savedRes = await userDashboardAPI.getSavedResources().catch(() => ({ data: null }));
+        
+        if (savedRes.data?.success) {
+          setResources(savedRes.data.data || []);
+        }
+      } catch (err) {
+        console.error('Error fetching saved resources:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  // Fallback data
+  const fallbackData = [
+    { _id: '1', title: 'IELTS Writing Task 2 - Sample Essays', type: 'PDF', category: 'Writing', savedDate: '2026-02-10', size: '2.5 MB', downloads: 156 },
+    { _id: '2', title: 'Speaking Cue Cards - Part 2 Topics', type: 'PDF', category: 'Speaking', savedDate: '2026-02-08', size: '1.8 MB', downloads: 89 },
+    { _id: '3', title: 'Listening Practice Audio - Section 1-4', type: 'Audio', category: 'Listening', savedDate: '2026-02-05', size: '45 MB', downloads: 234 },
   ];
+
+  const resourcesData = resources.length ? resources : fallbackData;
 
   const getTypeColor = (type) => {
     switch(type) {
@@ -77,6 +54,28 @@ const SavedResources = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl p-6 text-white animate-pulse">
+          <div className="h-8 bg-cyan-500/50 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-cyan-500/50 rounded w-1/2"></div>
+        </div>
+        <div className="grid gap-4">
+          {[1,2,3].map(i => (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-lg animate-pulse flex items-center gap-4">
+              <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+              <div className="flex-1">
+                <div className="h-5 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -89,15 +88,15 @@ const SavedResources = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">Total Saved</div>
-          <div className="text-2xl font-bold text-gray-800">24</div>
+          <div className="text-2xl font-bold text-gray-800">{resourcesData.length}</div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">PDFs</div>
-          <div className="text-2xl font-bold text-red-600">12</div>
+          <div className="text-2xl font-bold text-red-600">{resourcesData.filter(r => r.type === 'PDF').length}</div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">Audio</div>
-          <div className="text-2xl font-bold text-blue-600">8</div>
+          <div className="text-2xl font-bold text-blue-600">{resourcesData.filter(r => r.type === 'Audio').length}</div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">Video</div>
@@ -107,8 +106,8 @@ const SavedResources = () => {
 
       {/* Resources Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {resources.map((resource) => (
-          <div key={resource.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        {resourcesData.map((resource) => (
+          <div key={resource._id || resource.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="text-4xl">{getCategoryIcon(resource.category)}</div>

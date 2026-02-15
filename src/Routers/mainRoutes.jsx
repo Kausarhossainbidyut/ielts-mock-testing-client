@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage";
 import NotFoundPage from "../pages/auth/NotFoundPage";
 import RegistrationPage from "../pages/auth/RegistrationPage";
@@ -24,6 +24,10 @@ import Analytics from "../pages/admin/Analytics";
 
 const mainRoutes = createBrowserRouter([
   {
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    },
     path: "/",
     element: <RootLayout></RootLayout>,
     errorElement: <NotFoundPage></NotFoundPage>,
@@ -35,7 +39,7 @@ const mainRoutes = createBrowserRouter([
       // User Dashboard Routes
       {
         path: "/dashboard",
-        element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
+        element: <PrivateRoute requireAdmin={false}><DashboardLayout /></PrivateRoute>,
         children: [
           {
             index: true,
@@ -70,7 +74,7 @@ const mainRoutes = createBrowserRouter([
       // Admin Dashboard Routes
       {
         path: "/admin",
-        element: <PrivateRoute><AdminLayout /></PrivateRoute>,
+        element: <PrivateRoute requireAdmin={true}><AdminLayout /></PrivateRoute>,
         children: [
           {
             index: true,

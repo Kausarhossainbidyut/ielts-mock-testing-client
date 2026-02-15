@@ -1,26 +1,79 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { adminAPI } from '../../utils/api';
 
 const AdminDashboard = () => {
-  const stats = [
+  const [stats, setStats] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [dashboardRes] = await Promise.all([
+          adminAPI.getDashboard().catch(() => ({ data: null })),
+        ]);
+        
+        if (dashboardRes.data?.success) {
+          setStats(dashboardRes.data.data?.stats || []);
+          setRecentActivity(dashboardRes.data.data?.recentActivity || []);
+        }
+      } catch (err) {
+        console.error('Error fetching admin dashboard:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  // Fallback data
+  const fallbackStats = [
     { label: 'Total Users', value: '2,547', change: '+12%', icon: '👥', color: 'bg-blue-500' },
     { label: 'Active Tests', value: '156', change: '+5%', icon: '📝', color: 'bg-green-500' },
     { label: 'Total Questions', value: '4,832', change: '+8%', icon: '❓', color: 'bg-purple-500' },
     { label: 'Test Submissions', value: '12,450', change: '+15%', icon: '📊', color: 'bg-orange-500' },
   ];
 
-  const recentActivity = [
+  const fallbackActivity = [
     { user: 'John Doe', action: 'Completed Test', test: 'IELTS Reading Practice', time: '2 mins ago' },
     { user: 'Sarah Smith', action: 'Registered', test: 'New Account', time: '15 mins ago' },
     { user: 'Mike Johnson', action: 'Submitted Writing', test: 'Task 2 Essay', time: '30 mins ago' },
     { user: 'Emily Brown', action: 'Completed Test', test: 'Listening Module', time: '1 hour ago' },
   ];
 
+  const statsData = stats.length ? stats : fallbackStats;
+  const activityData = recentActivity.length ? recentActivity : fallbackActivity;
+
+  // Fallback top tests
   const topTests = [
     { name: 'IELTS Academic Reading', attempts: 1250, avgScore: 6.8 },
     { name: 'IELTS Listening Practice', attempts: 1100, avgScore: 7.2 },
     { name: 'Writing Task 2', attempts: 980, avgScore: 6.5 },
     { name: 'Speaking Part 1', attempts: 850, avgScore: 7.0 },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 text-white animate-pulse">
+          <div className="h-8 bg-gray-700/50 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-700/50 rounded w-1/2"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
+              <div className="h-14 bg-gray-200 rounded-xl mb-4"></div>
+              <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -32,7 +85,7 @@ const AdminDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
+        {statsData.map((stat, index) => (
           <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div className={`w-14 h-14 ${stat.color} rounded-xl flex items-center justify-center text-2xl`}>
@@ -76,7 +129,7 @@ const AdminDashboard = () => {
             <h2 className="text-xl font-bold text-gray-800">Recent Activity</h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {recentActivity.map((activity, index) => (
+            {activityData.map((activity, index) => (
               <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div>

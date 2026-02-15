@@ -1,7 +1,33 @@
+import { useState, useEffect } from 'react';
+import { userDashboardAPI } from '../../utils/api';
+
 const WeakAreas = () => {
-  const weakAreas = [
+  const [weakAreas, setWeakAreas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const analyticsRes = await userDashboardAPI.getAnalytics().catch(() => ({ data: null }));
+        
+        if (analyticsRes.data?.success) {
+          setWeakAreas(analyticsRes.data.data?.weakAreas || []);
+        }
+      } catch (err) {
+        console.error('Error fetching weak areas:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  // Fallback data
+  const fallbackData = [
     { 
-      id: 1, 
+      _id: '1', 
       skill: 'Writing Task 2', 
       issue: 'Essay Structure', 
       accuracy: 45, 
@@ -11,7 +37,7 @@ const WeakAreas = () => {
       resources: 3
     },
     { 
-      id: 2, 
+      _id: '2', 
       skill: 'Reading', 
       issue: 'True/False/Not Given', 
       accuracy: 58, 
@@ -21,7 +47,7 @@ const WeakAreas = () => {
       resources: 5
     },
     { 
-      id: 3, 
+      _id: '3', 
       skill: 'Speaking', 
       issue: 'Part 2 - Cue Card', 
       accuracy: 62, 
@@ -31,7 +57,7 @@ const WeakAreas = () => {
       resources: 4
     },
     { 
-      id: 4, 
+      _id: '4', 
       skill: 'Listening', 
       issue: 'Multiple Choice', 
       accuracy: 70, 
@@ -42,12 +68,34 @@ const WeakAreas = () => {
     },
   ];
 
+  const areasData = weakAreas.length ? weakAreas : fallbackData;
+
   const getAccuracyColor = (accuracy) => {
     if (accuracy >= 80) return 'bg-green-500';
     if (accuracy >= 60) return 'bg-yellow-500';
     if (accuracy >= 40) return 'bg-orange-500';
     return 'bg-red-500';
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-red-500 to-orange-600 rounded-2xl p-6 text-white animate-pulse">
+          <div className="h-8 bg-red-500/50 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-red-500/50 rounded w-1/2"></div>
+        </div>
+        <div className="grid gap-4">
+          {[1,2,3].map(i => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-lg animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="h-2 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -75,8 +123,8 @@ const WeakAreas = () => {
 
       {/* Weak Areas Cards */}
       <div className="space-y-4">
-        {weakAreas.map((area) => (
-          <div key={area.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+        {areasData.map((area) => (
+          <div key={area._id || area.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">

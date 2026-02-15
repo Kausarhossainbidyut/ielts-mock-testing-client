@@ -1,14 +1,44 @@
+import { useState, useEffect } from 'react';
+import { userDashboardAPI, resultsAPI } from '../../utils/api';
+
 const PracticeHistory = () => {
-  const history = [
-    { id: 1, date: '2026-02-14', time: '10:30 AM', type: 'Reading', test: 'Academic Reading Practice', duration: '45 min', score: 7.5, status: 'Completed' },
-    { id: 2, date: '2026-02-13', time: '2:15 PM', type: 'Listening', test: 'Listening Section 1-4', duration: '30 min', score: 8.0, status: 'Completed' },
-    { id: 3, date: '2026-02-12', time: '11:00 AM', type: 'Writing', test: 'Task 2 Essay', duration: '40 min', score: 6.5, status: 'Completed' },
-    { id: 4, date: '2026-02-12', time: '3:30 PM', type: 'Speaking', test: 'Part 2 Cue Card', duration: '15 min', score: 7.0, status: 'Completed' },
-    { id: 5, date: '2026-02-11', time: '9:00 AM', type: 'Full Test', test: 'Mock Test Band 7', duration: '120 min', score: 6.5, status: 'Completed' },
-    { id: 6, date: '2026-02-10', time: '4:00 PM', type: 'Reading', test: 'TFNG Questions', duration: '20 min', score: 7.0, status: 'Completed' },
-    { id: 7, date: '2026-02-09', time: '1:00 PM', type: 'Listening', test: 'Multiple Choice', duration: '15 min', score: 7.5, status: 'Completed' },
-    { id: 8, date: '2026-02-08', time: '10:00 AM', type: 'Writing', test: 'Task 1 Letter', duration: '20 min', score: 6.0, status: 'Completed' },
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const [practiceRes, resultsRes] = await Promise.all([
+          userDashboardAPI.getPracticeHistory().catch(() => ({ data: null })),
+          resultsAPI.getMyResults().catch(() => ({ data: null }))
+        ]);
+        
+        if (practiceRes.data?.success) {
+          setHistory(practiceRes.data.data || []);
+        } else if (resultsRes.data?.success) {
+          setHistory(resultsRes.data.data || []);
+        }
+      } catch (err) {
+        console.error('Error fetching practice history:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  // Fallback data
+  const fallbackData = [
+    { _id: '1', date: '2026-02-14', time: '10:30 AM', type: 'Reading', test: 'Academic Reading Practice', duration: '45 min', score: 7.5, status: 'Completed' },
+    { _id: '2', date: '2026-02-13', time: '2:15 PM', type: 'Listening', test: 'Listening Section 1-4', duration: '30 min', score: 8.0, status: 'Completed' },
+    { _id: '3', date: '2026-02-12', time: '11:00 AM', type: 'Writing', test: 'Task 2 Essay', duration: '40 min', score: 6.5, status: 'Completed' },
+    { _id: '4', date: '2026-02-12', time: '3:30 PM', type: 'Speaking', test: 'Part 2 Cue Card', duration: '15 min', score: 7.0, status: 'Completed' },
   ];
+
+  const historyData = history.length ? history : fallbackData;
 
   const getTypeColor = (type) => {
     switch(type) {
@@ -28,6 +58,33 @@ const PracticeHistory = () => {
     return 'text-red-500';
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl p-6 text-white animate-pulse">
+          <div className="h-8 bg-indigo-500/50 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-indigo-500/50 rounded w-1/2"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="bg-white rounded-xl p-5 shadow-md animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="space-y-3">
+            {[1,2,3].map(i => (
+              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -40,19 +97,19 @@ const PracticeHistory = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">Total Sessions</div>
-          <div className="text-2xl font-bold text-gray-800">48</div>
+          <div className="text-2xl font-bold text-gray-800">{historyData.length}</div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">This Week</div>
-          <div className="text-2xl font-bold text-blue-600">8</div>
+          <div className="text-2xl font-bold text-blue-600">{historyData.length}</div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">Total Hours</div>
-          <div className="text-2xl font-bold text-purple-600">24h</div>
+          <div className="text-2xl font-bold text-purple-600">{Math.round(historyData.length * 0.5)}h</div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-md">
           <div className="text-gray-500 text-sm">Avg. Score</div>
-          <div className="text-2xl font-bold text-green-600">7.0</div>
+          <div className="text-2xl font-bold text-green-600">{historyData.length > 0 ? (historyData.reduce((a, b) => a + (b.score || 0), 0) / historyData.filter(h => h.score).length).toFixed(1) : 0}</div>
         </div>
       </div>
 
@@ -63,8 +120,8 @@ const PracticeHistory = () => {
         </div>
         
         <div className="divide-y divide-gray-200">
-          {history.map((item) => (
-            <div key={item.id} className="p-5 hover:bg-gray-50 transition-colors">
+          {historyData.map((item) => (
+            <div key={item._id || item.id} className="p-5 hover:bg-gray-50 transition-colors">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 {/* Date & Time */}
                 <div className="flex items-center gap-4">

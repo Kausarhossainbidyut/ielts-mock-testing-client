@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
 import { AuthContext } from '../../Provider/AuthProvider';
 
 const LoginPage = () => {
@@ -8,7 +7,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation()
   
   const from = location.state?.from?.pathname || '/';
   
@@ -22,9 +21,24 @@ const LoginPage = () => {
     setError('');
     
     try {
-      await signIn(email, password);
+      const res = await signIn(email, password);
       form.reset();
-      navigate(from, { replace: true });
+      
+      // Get user role from response and redirect accordingly
+      // signIn returns res.data from axios
+      const userData = res?.user;
+      const userRole = userData?.role;
+      
+      console.log('Login response - user role:', userRole); // Debug
+      
+      // Redirect based on role - admin always goes to admin dashboard
+      if (userRole === 'admin' || userRole === 'super_admin' || userRole === 'content_admin') {
+        navigate('/admin', { replace: true });
+      } else if (userRole === 'user' || !userRole) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error(error);
       setError(error.response?.data?.message || error.message || 'Login failed');
