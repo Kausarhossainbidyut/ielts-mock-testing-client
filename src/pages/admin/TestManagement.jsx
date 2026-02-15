@@ -74,7 +74,7 @@ const TestManagement = () => {
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
-      text: 'You won\'t be able to revert this!',
+      text: "You won't be able to revert this!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -90,6 +90,16 @@ const TestManagement = () => {
       } catch (err) {
         Swal.fire('Error', 'Failed to delete test', 'error');
       }
+    }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await testsAPI.updateTest(id, { status: newStatus });
+      Swal.fire('Success', `Test status changed to ${newStatus}`, 'success');
+      fetchTests();
+    } catch {
+      Swal.fire('Error', 'Failed to update status', 'error');
     }
   };
 
@@ -197,13 +207,19 @@ const TestManagement = () => {
                     </td>
                     <td className="px-6 py-4 text-gray-600">{test.duration} min</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        test.status === 'published' ? 'bg-green-100 text-green-700' : 
-                        test.status === 'draft' ? 'bg-yellow-100 text-yellow-700' : 
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {test.status}
-                      </span>
+                      <select
+                        value={test.status}
+                        onChange={(e) => handleStatusChange(test._id, e.target.value)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer ${
+                          test.status === 'published' ? 'bg-green-100 text-green-700' : 
+                          test.status === 'draft' ? 'bg-yellow-100 text-yellow-700' : 
+                          'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="archived">Archived</option>
+                      </select>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">

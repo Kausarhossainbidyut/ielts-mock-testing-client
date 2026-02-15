@@ -66,14 +66,14 @@ const UserManagement = () => {
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
-      text: 'You won\'t be able to revert this!',
+      text: "You won't be able to revert this!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
       confirmButtonText: 'Yes, delete it!'
     });
-
+  
     if (result.isConfirmed) {
       try {
         await adminAPI.deleteUser(id);
@@ -82,6 +82,16 @@ const UserManagement = () => {
       } catch {
         Swal.fire('Error', 'Failed to delete user', 'error');
       }
+    }
+  };
+  
+  const handleRoleChange = async (id, newRole) => {
+    try {
+      await adminAPI.updateUser(id, { role: newRole });
+      Swal.fire('Success', `User role changed to ${newRole}`, 'success');
+      fetchUsers();
+    } catch {
+      Swal.fire('Error', 'Failed to update role', 'error');
     }
   };
 
@@ -189,12 +199,18 @@ const UserManagement = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      user.role === 'admin' ? 'bg-red-100 text-red-700' : 
-                      user.role === 'content_admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {user.role === 'content_admin' ? 'Content Admin' : user.role}
-                    </span>
+                    <select
+                      value={user.role}
+                      onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer ${
+                        user.role === 'admin' ? 'bg-red-100 text-red-700' : 
+                        user.role === 'content_admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
+                      <option value="user">User</option>
+                      <option value="content_admin">Content Admin</option>
+                      <option value="admin">Admin</option>
+                    </select>
                   </td>
                   <td className="px-6 py-4 text-gray-600">{user.targetBand || '-'}</td>
                   <td className="px-6 py-4 text-gray-600 capitalize">{user.currentLevel || '-'}</td>
