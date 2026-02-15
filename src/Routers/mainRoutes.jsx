@@ -54,6 +54,22 @@ const mainRoutes = createBrowserRouter([
         element: <TestsPage />
       },
       {
+        path: "/listening",
+        element: <TestsPage filter="listening" />
+      },
+      {
+        path: "/reading",
+        element: <TestsPage filter="reading" />
+      },
+      {
+        path: "/writing",
+        element: <TestsPage filter="writing" />
+      },
+      {
+        path: "/speaking",
+        element: <TestsPage filter="speaking" />
+      },
+      {
         path: "/tips",
         element: <TipsPage />
       },

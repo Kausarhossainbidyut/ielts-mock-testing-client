@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { testsAPI, questionsAPI, resultsAPI } from '../../utils/api';
+import { questionsAPI, resultsAPI } from '../../utils/api';
 
 const ReadingTest = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams()
+  const navigate = useNavigate()
   
-  const [test, setTest] = useState(null);
   const [passages, setPassages] = useState([]);
   const [currentPassage, setCurrentPassage] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -23,8 +22,15 @@ const ReadingTest = () => {
         setLoading(true);
         const res = await questionsAPI.getReadingQuestions(id);
         
-        if (res.data?.success && res.data.data?.length > 0) {
-          setPassages([{ title: 'Reading Passage', questions: res.data.data }]);
+        if (res.data?.success && res.data.data?.questions?.length > 0) {
+          const questions = res.data.data.questions;
+          setPassages([{ title: questions[0]?.passageTitle || 'Reading Passage', questions: questions.map(q => ({
+            _id: q._id,
+            questionNumber: q.questionNumber,
+            question: q.content,
+            options: q.options?.map(opt => ({ id: opt.letter.toLowerCase(), text: opt.text })) || [],
+            correctAnswer: q.correctAnswers?.[0]?.answer?.toLowerCase() || 'a'
+          }))}]);
           setTimeLeft(60 * 60);
         } else {
           setPassages(generateSampleReadingPassages());

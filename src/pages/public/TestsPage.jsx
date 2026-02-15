@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { testsAPI } from '../../utils/api';
 
-const TestsPage = () => {
+const TestsPage = ({ filter: filterProp }) => {
+  const [searchParams] = useSearchParams();
+  const urlFilter = searchParams.get('type');
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState(filterProp || urlFilter || 'all');
 
   useEffect(() => {
     const fetchTests = async () => {
@@ -33,9 +35,15 @@ const TestsPage = () => {
 
   const filteredTests = filter === 'all' 
     ? tests 
-    : tests.filter(t => t.type?.toLowerCase() === filter.toLowerCase());
+    : tests.filter(t => {
+      // Filter by type
+      if (t.type?.toLowerCase() === filter.toLowerCase()) return true;
+      // Filter by skills array
+      if (t.skills?.some(s => s.toLowerCase() === filter.toLowerCase())) return true;
+      return false;
+    });
 
-  const testTypes = ['all', 'Listening', 'Reading', 'Writing', 'Speaking', 'Full Test'];
+  const testTypes = ['all', 'listening', 'reading', 'writing', 'speaking', 'full-mock'];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
@@ -60,7 +68,7 @@ const TestsPage = () => {
                   : 'bg-white text-gray-600 hover:bg-blue-50 border border-gray-200'
               }`}
             >
-              {type === 'all' ? 'All Tests' : type}
+              {type === 'all' ? 'All Tests' : type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')}
             </button>
           ))}
         </div>
@@ -114,9 +122,16 @@ const TestsPage = () => {
                     <span>⏱️ {test.duration || test.time} min</span>
                   </div>
                   <Link
-                    to={test.type && ['listening', 'reading', 'writing', 'speaking'].includes(test.type.toLowerCase()) 
-                      ? `/test/${test.type.toLowerCase()}/${test._id}` 
-                      : `/test/${test._id}`}
+                    to={(() => {
+                      const skill = test.skills?.[0]?.toLowerCase();
+                      if (skill && ['listening', 'reading', 'writing', 'speaking'].includes(skill)) {
+                        return `/test/${skill}/${test._id}`;
+                      }
+                      if (test.type && ['listening', 'reading', 'writing', 'speaking'].includes(test.type.toLowerCase())) {
+                        return `/test/${test.type.toLowerCase()}/${test._id}`;
+                      }
+                      return `/test/${test._id}`;
+                    })()}
                     className="block w-full text-center py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all"
                   >
                     Start Test

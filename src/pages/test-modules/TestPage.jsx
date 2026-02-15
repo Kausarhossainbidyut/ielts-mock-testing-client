@@ -26,8 +26,16 @@ const TestPage = () => {
         ]);
         
         if (testRes.data?.success) {
-          setTest(testRes.data.data);
-          setTimeLeft((testRes.data.data.duration || 60) * 60);
+          const testData = testRes.data.data;
+          setTest(testData);
+          setTimeLeft((testData.duration || 60) * 60);
+          
+          // Auto-redirect to specific module based on skills
+          const skill = testData.skills?.[0]?.toLowerCase();
+          if (skill && ['listening', 'reading', 'writing', 'speaking'].includes(skill)) {
+            navigate(`/test/${skill}/${id}`, { replace: true });
+            return;
+          }
         }
         
         if (questionsRes.data?.success && questionsRes.data.data?.length > 0) {

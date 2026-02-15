@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { testsAPI, questionsAPI, resultsAPI } from '../../utils/api';
+import { questionsAPI, resultsAPI } from '../../utils/api';
 
 const WritingTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
+  const [tasks, setTasks] = useState([]);
   const [currentTask, setCurrentTask] = useState(1);
   const [task1Answer, setTask1Answer] = useState('');
   const [task2Answer, setTask2Answer] = useState('');
@@ -16,9 +17,41 @@ const WritingTest = () => {
   const [result, setResult] = useState(null);
 
   useEffect(() => {
-    setLoading(false);
-    setTimeLeft(60 * 60); // 60 minutes for both tasks
-  }, []);
+    const fetchWritingTasks = async () => {
+      try {
+        setLoading(true);
+        const res = await questionsAPI.getWritingQuestions(id);
+        
+        if (res.data?.success && res.data.data?.questions?.length > 0) {
+          const dbTasks = res.data.data.questions;
+          setTasks(dbTasks.map(q => ({
+            _id: q._id,
+            task: q.task,
+            questionNumber: q.questionNumber,
+            prompt: q.prompt,
+            chartType: q.chartType,
+            essayType: q.essayType,
+            wordLimit: q.wordLimit || (q.task === 1 ? 150 : 250),
+            timeAllowed: q.timeAllowed || (q.task === 1 ? 20 : 40)
+          })));
+        } else {
+          setTasks([
+            { _id: '1', task: 1, prompt: 'The chart below shows...', chartType: 'bar-chart', wordLimit: 150, timeAllowed: 20 },
+            { _id: '2', task: 2, prompt: 'Some people believe...', essayType: 'opinion', wordLimit: 250, timeAllowed: 40 }
+          ]);
+        }
+      } catch {
+        setTasks([
+          { _id: '1', task: 1, prompt: 'The chart below shows...', chartType: 'bar-chart', wordLimit: 150, timeAllowed: 20 },
+          { _id: '2', task: 2, prompt: 'Some people believe...', essayType: 'opinion', wordLimit: 250, timeAllowed: 40 }
+        ]);
+      } finally {
+        setLoading(false);
+        if (!testStarted) setTimeLeft(60 * 60);
+      }
+    };
+    fetchWritingTasks();
+  }, [id]);
 
   useEffect(() => {
     if (!testStarted || timeLeft <= 0 || testSubmitted) return;
@@ -85,8 +118,8 @@ const WritingTest = () => {
           <div className="text-6xl mb-4">✍️</div>
           <h1 className="text-2xl font-bold text-gray-800 mb-4">IELTS Writing Test</h1>
           <div className="space-y-3 mb-6 text-left bg-gray-50 p-4 rounded-lg">
-            <p className="text-gray-600">📝 <strong>Task 1</strong> - Report (150 words, 20 min)</p>
-            <p className="text-gray-600">📝 <strong>Task 2</strong> - Essay (250 words, 40 min)</p>
+            <p className="text-gray-600">📝 <strong>Task 1</strong> - {tasks[0]?.chartType || 'Report'} ({tasks[0]?.wordLimit || 150} words, {tasks[0]?.timeAllowed || 20} min)</p>
+            <p className="text-gray-600">📝 <strong>Task 2</strong> - {tasks[1]?.essayType || 'Essay'} ({tasks[1]?.wordLimit || 250} words, {tasks[1]?.timeAllowed || 40} min)</p>
             <p className="text-gray-600">⏱️ <strong>60 Minutes</strong> - Total time</p>
           </div>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-left">

@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { testsAPI, questionsAPI, resultsAPI } from '../../utils/api';
+import { questionsAPI, resultsAPI } from '../../utils/api';
 import Swal from 'sweetalert2';
 
 const ListeningTest = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams()
+  const navigate = useNavigate()
   
-  const [test, setTest] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -15,10 +14,8 @@ const ListeningTest = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [testStarted, setTestStarted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [testSubmitted, setTestSubmitted] = useState(false);
   const [result, setResult] = useState(null);
-  const audioRef = useRef(null);
 
   useEffect(() => {
     const fetchTest = async () => {
@@ -26,9 +23,33 @@ const ListeningTest = () => {
         setLoading(true);
         const res = await questionsAPI.getListeningQuestions(id);
         
-        if (res.data?.success && res.data.data?.length > 0) {
-          setQuestions(res.data.data);
-          setTimeLeft(30 * 60); // 30 minutes for listening
+        if (res.data?.success && res.data.data?.questions?.length > 0) {
+          const dbQuestions = res.data.data.questions;
+          // Group by section
+          const sections = {};
+          dbQuestions.forEach(q => {
+            const sectionTitle = q.section?.title || 'Section 1';
+            if (!sections[sectionTitle]) {
+              sections[sectionTitle] = [];
+            }
+            sections[sectionTitle].push({
+              _id: q._id,
+              questionNumber: q.questionNumber,
+              question: q.content,
+              audioUrl: q.audioUrl,
+              options: q.options?.map(opt => ({ id: opt.letter.toLowerCase(), text: opt.text })) || [],
+              correctAnswer: q.correctAnswers?.[0]?.answer?.toLowerCase() || 'a'
+            });
+          });
+          
+          const formattedQuestions = Object.entries(sections).map(([title, qs]) => ({
+            section: title,
+            audio: qs[0]?.audioUrl || null,
+            questions: qs
+          }));
+          
+          setQuestions(formattedQuestions.length ? formattedQuestions : generateSampleListeningQuestions());
+          setTimeLeft(30 * 60);
         } else {
           // Sample questions
           setQuestions(generateSampleListeningQuestions());

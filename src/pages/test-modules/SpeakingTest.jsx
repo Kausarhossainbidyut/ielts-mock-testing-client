@@ -6,6 +6,7 @@ const SpeakingTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
+  const [questions, setQuestions] = useState([]);
   const [currentPart, setCurrentPart] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
@@ -14,12 +15,54 @@ const SpeakingTest = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [testSubmitted, setTestSubmitted] = useState(false);
   const [result, setResult] = useState(null);
-  const [recordedAnswers, setRecordedAnswers] = useState({});
 
   useEffect(() => {
-    setLoading(false);
-    setTimeLeft(15 * 60); // 15 minutes for speaking
-  }, []);
+    const fetchSpeakingQuestions = async () => {
+      try {
+        setLoading(true);
+        const res = await questionsAPI.getSpeakingQuestions(id);
+        
+        if (res.data?.success && res.data.data?.questions?.length > 0) {
+          const dbQuestions = res.data.data.questions;
+          // Group by part
+          const parts = {};
+          dbQuestions.forEach(q => {
+            const part = q.part || 1;
+            if (!parts[part]) parts[part] = [];
+            parts[part].push({
+              _id: q._id,
+              questionNumber: q.questionNumber,
+              question: q.question,
+              topic: q.topic,
+              cueCard: q.cueCard,
+              timeAllowed: q.timeAllowed
+            });
+          });
+          
+          setQuestions(Object.entries(parts).map(([part, qs]) => ({
+            part: parseInt(part),
+            questions: qs
+          })));
+        } else {
+          setQuestions([
+            { part: 1, questions: [{ question: 'Do you work or are you a student?', topic: 'Work' }] },
+            { part: 2, questions: [{ question: 'Describe a memorable journey...', topic: 'Travel' }] },
+            { part: 3, questions: [{ question: 'Discuss the importance of travel...', topic: 'Discussion' }] }
+          ]);
+        }
+      } catch {
+        setQuestions([
+          { part: 1, questions: [{ question: 'Do you work or are you a student?', topic: 'Work' }] },
+          { part: 2, questions: [{ question: 'Describe a memorable journey...', topic: 'Travel' }] },
+          { part: 3, questions: [{ question: 'Discuss the importance of travel...', topic: 'Discussion' }] }
+        ]);
+      } finally {
+        setLoading(false);
+        if (!testStarted) setTimeLeft(15 * 60);
+      }
+    };
+    fetchSpeakingQuestions();
+  }, [id]);
 
   useEffect(() => {
     if (!testStarted || timeLeft <= 0 || testSubmitted) return;
@@ -44,7 +87,6 @@ const SpeakingTest = () => {
 
   const handleNoteChange = (part, note) => {
     setAnswers(prev => ({ ...prev, [part]: note }));
-    setRecordedAnswers(prev => ({ ...prev, [part]: isRecording }));
   };
 
   const handleSubmit = async () => {
@@ -117,9 +159,9 @@ const SpeakingTest = () => {
           <div className="text-6xl mb-4">🎤</div>
           <h1 className="text-2xl font-bold text-gray-800 mb-4">IELTS Speaking Test</h1>
           <div className="space-y-3 mb-6 text-left bg-gray-50 p-4 rounded-lg">
-            <p className="text-gray-600">🎤 <strong>Part 1</strong> - Introduction (4-5 min)</p>
-            <p className="text-gray-600">📝 <strong>Part 2</strong> - Long Turn (3-4 min)</p>
-            <p className="text-gray-600">💬 <strong>Part 3</strong> - Discussion (4-5 min)</p>
+            <p className="text-gray-600">🎤 <strong>Part 1</strong> - Introduction (4-5 min){questions[0]?.questions?.[0]?.topic && ` - ${questions[0].questions[0].topic}`}</p>
+            <p className="text-gray-600">📝 <strong>Part 2</strong> - Long Turn (3-4 min){questions[1]?.questions?.[0]?.topic && ` - ${questions[1].questions[0].topic}`}</p>
+            <p className="text-gray-600">💬 <strong>Part 3</strong> - Discussion (4-5 min){questions[2]?.questions?.[0]?.topic && ` - ${questions[2].questions[0].topic}`}</p>
             <p className="text-gray-600">⏱️ <strong>15 Minutes</strong> - Total time</p>
           </div>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-left">
