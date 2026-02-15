@@ -19,7 +19,7 @@ const MyTests = () => {
         ]);
         
         if (testsRes.data?.success) {
-          setTests(testsRes.data.data || []);
+          setTests(testsRes.data.data?.tests || testsRes.data.data || []);
         }
         
         if (statsRes.data?.success) {

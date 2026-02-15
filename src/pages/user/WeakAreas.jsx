@@ -12,7 +12,7 @@ const WeakAreas = () => {
         const analyticsRes = await userAPI.getAnalytics().catch(() => ({ data: null }));
         
         if (analyticsRes.data?.success) {
-          setWeakAreas(analyticsRes.data.data?.weakAreas || []);
+          setWeakAreas(analyticsRes.data.data?.weakAreas || analyticsRes.data.data?.skills || []);
         }
       } catch (err) {
         console.error('Error fetching weak areas:', err);

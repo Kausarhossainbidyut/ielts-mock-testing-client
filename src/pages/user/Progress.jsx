@@ -21,7 +21,7 @@ const Progress = () => {
         }
         
         if (resultsRes.data?.success) {
-          const results = resultsRes.data.data || [];
+          const results = resultsRes.data.data?.results || resultsRes.data.data || [];
           // Transform results into weekly progress
           const last7Days = results.slice(0, 7).map((r, i) => ({
             day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i % 7],

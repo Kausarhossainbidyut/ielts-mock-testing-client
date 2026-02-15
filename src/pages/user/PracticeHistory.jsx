@@ -16,9 +16,9 @@ const PracticeHistory = () => {
         ]);
         
         if (practiceRes.data?.success) {
-          setHistory(practiceRes.data.data || []);
+          setHistory(practiceRes.data.data?.practiceHistory || practiceRes.data.data || []);
         } else if (resultsRes.data?.success) {
-          setHistory(resultsRes.data.data || []);
+          setHistory(resultsRes.data.data?.results || resultsRes.data.data || []);
         }
       } catch (err) {
         console.error('Error fetching practice history:', err);

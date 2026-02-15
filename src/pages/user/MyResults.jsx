@@ -17,7 +17,7 @@ const MyResults = () => {
         ]);
         
         if (resultsRes.data?.success) {
-          setResults(resultsRes.data.data || []);
+          setResults(resultsRes.data.data?.results || resultsRes.data.data || []);
         }
         
         if (statsRes.data?.success) {

@@ -12,7 +12,7 @@ const SavedResources = () => {
         const savedRes = await userAPI.getSavedResources().catch(() => ({ data: null }));
         
         if (savedRes.data?.success) {
-          setResources(savedRes.data.data || []);
+          setResources(savedRes.data.data?.resources || savedRes.data.data || []);
         }
       } catch (err) {
         console.error('Error fetching saved resources:', err);

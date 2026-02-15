@@ -13,7 +13,7 @@ const TestsPage = () => {
         setLoading(true);
         const res = await testsAPI.getAllTests();
         if (res.data?.success) {
-          setTests(res.data.data || []);
+          setTests(res.data.data?.tests || res.data.data || []);
         }
       } catch (err) {
         console.error('Error fetching tests:', err);

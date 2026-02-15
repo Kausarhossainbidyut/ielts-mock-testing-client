@@ -12,7 +12,7 @@ const ResourcesPage = () => {
         setLoading(true);
         const res = await resourcesAPI.getAllResources();
         if (res.data?.success) {
-          setResources(res.data.data || []);
+          setResources(res.data.data?.resources || res.data.data || []);
         }
       } catch (err) {
         console.error('Error fetching resources:', err);

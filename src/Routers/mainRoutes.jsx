@@ -82,6 +82,10 @@ const mainRoutes = createBrowserRouter([
         path: "/test/speaking/:id",
         element: <PrivateRoute><SpeakingTest /></PrivateRoute>
       },
+      {
+        path: "/test/speaking/:id",
+        element: <PrivateRoute><SpeakingTest /></PrivateRoute>
+      },
       // User Dashboard Routes
       {
         path: "/dashboard",

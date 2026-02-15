@@ -12,7 +12,7 @@ const TipsPage = () => {
         setLoading(true);
         const res = await tipsAPI.getAllTips();
         if (res.data?.success) {
-          setTips(res.data.data || []);
+          setTips(res.data.data?.tips || res.data.data || []);
         }
       } catch (err) {
         console.error('Error fetching tips:', err);
