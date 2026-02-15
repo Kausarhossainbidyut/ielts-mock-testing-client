@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { testsAPI } from '../../utils/api';
+import { testsAPI, questionsAPI } from '../../utils/api';
 import Swal from 'sweetalert2';
 
 const TestManagement = () => {
@@ -10,6 +10,7 @@ const TestManagement = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [editingTest, setEditingTest] = useState(null);
+  const [activeTab, setActiveTab] = useState('details'); // details, questions
   const [formData, setFormData] = useState({
     title: '',
     testId: '',
@@ -18,6 +19,22 @@ const TestManagement = () => {
     difficulty: 'medium',
     duration: 30,
     status: 'draft'
+  });
+  
+  // Questions for each skill
+  const [questions, setQuestions] = useState({
+    listening: [],
+    reading: [],
+    writing: [],
+    speaking: []
+  });
+  const [newQuestion, setNewQuestion] = useState({
+    skill: 'reading',
+    type: 'multiple-choice',
+    question: '',
+    options: [{ letter: 'A', text: '', isCorrect: false }],
+    correctAnswer: 'a',
+    explanation: ''
   });
 
   useEffect(() => {
@@ -40,19 +57,44 @@ const TestManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate - at least one skill required
+    if (!formData.skills || formData.skills.length === 0) {
+      Swal.fire('Error', 'Please select at least one skill (Listening, Reading, Writing, or Speaking)', 'error');
+      return;
+    }
+    
     try {
+      let testId;
       if (editingTest) {
         await testsAPI.updateTest(editingTest._id, formData);
+        testId = editingTest._id;
         Swal.fire('Success', 'Test updated successfully', 'success');
+        
+        // Save questions only when editing
+        for (const skill of formData.skills) {
+          const skillQuestions = questions[skill] || [];
+          for (const q of skillQuestions) {
+            try {
+              await questionsAPI.createQuestion(skill, { ...q, test: testId });
+            } catch (qErr) {
+              console.error(`Error saving ${skill} question:`, qErr);
+            }
+          }
+        }
       } else {
-        await testsAPI.createTest(formData);
-        Swal.fire('Success', 'Test created successfully', 'success');
+        const res = await testsAPI.createTest(formData);
+        testId = res.data?.data?._id;
+        Swal.fire('Success', 'Test created! Now you can edit to add questions.', 'success');
       }
+      
       setShowModal(false);
       setEditingTest(null);
       setFormData({ title: '', testId: '', type: 'practice', skills: [], difficulty: 'medium', duration: 30, status: 'draft' });
+      setQuestions({ listening: [], reading: [], writing: [], speaking: [] });
       fetchTests();
     } catch (err) {
+      Swal.fire('Error', err.response?.data?.message || 'Failed to save test', 'error');
       Swal.fire('Error', err.response?.data?.message || 'Failed to save test', 'error');
     }
   };
@@ -87,7 +129,7 @@ const TestManagement = () => {
         await testsAPI.deleteTest(id);
         Swal.fire('Deleted!', 'Test has been deleted.', 'success');
         fetchTests();
-      } catch (err) {
+      } catch {
         Swal.fire('Error', 'Failed to delete test', 'error');
       }
     }
@@ -101,6 +143,56 @@ const TestManagement = () => {
     } catch {
       Swal.fire('Error', 'Failed to update status', 'error');
     }
+  };
+
+  // Question management functions
+  const addQuestion = () => {
+    if (!newQuestion.question.trim()) {
+      Swal.fire('Error', 'Please enter a question', 'error');
+      return;
+    }
+    
+    const q = {
+      ...newQuestion,
+      options: newQuestion.options.filter(o => o.text.trim()),
+      questionNumber: questions[newQuestion.skill].length + 1
+    };
+    
+    setQuestions(prev => ({
+      ...prev,
+      [newQuestion.skill]: [...prev[newQuestion.skill], q]
+    }));
+    
+    setNewQuestion({
+      skill: newQuestion.skill,
+      type: 'multiple-choice',
+      question: '',
+      options: [{ letter: 'A', text: '', isCorrect: false }],
+      correctAnswer: 'a',
+      explanation: ''
+    });
+  };
+
+  const removeQuestion = (skill, index) => {
+    setQuestions(prev => ({
+      ...prev,
+      [skill]: prev[skill].filter((_, i) => i !== index)
+    }));
+  };
+
+  const addOption = () => {
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    setNewQuestion(prev => ({
+      ...prev,
+      options: [...prev.options, { letter: letters[prev.options.length], text: '', isCorrect: false }]
+    }));
+  };
+
+  const updateOption = (index, field, value) => {
+    setNewQuestion(prev => ({
+      ...prev,
+      options: prev.options.map((opt, i) => i === index ? { ...opt, [field]: value } : opt)
+    }));
   };
 
   const filteredTests = tests.filter(test => {
@@ -248,9 +340,31 @@ const TestManagement = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">{editingTest ? 'Edit Test' : 'Create New Test'}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {/* Tabs - Only show when editing */}
+            {editingTest && (
+              <div className="flex border-b mb-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('details')}
+                  className={`px-4 py-2 font-medium ${activeTab === 'details' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+                >
+                  Test Details
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('questions')}
+                  className={`px-4 py-2 font-medium ${activeTab === 'questions' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+                >
+                  Questions ({questions.listening.length + questions.reading.length + questions.writing.length + questions.speaking.length})
+                </button>
+              </div>
+            )}
+            
+            {(!editingTest || activeTab === 'details') && (
+              <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Test Title</label>
                 <input
@@ -301,7 +415,7 @@ const TestManagement = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Skills <span className="text-red-500">*</span></label>
                 <div className="flex gap-3">
                   {['listening', 'reading', 'writing', 'speaking'].map(skill => (
                     <label key={skill} className="flex items-center gap-1">
@@ -361,6 +475,118 @@ const TestManagement = () => {
                 </button>
               </div>
             </form>
+            )}
+            
+            {/* Questions Tab - Only when editing */}
+            {editingTest && activeTab === 'questions' && (
+              <div className="space-y-4">
+                {/* Add Question Form */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-3">Add New Question</h3>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Skill</label>
+                      <select
+                        value={newQuestion.skill}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, skill: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm"
+                      >
+                        {formData.skills.includes('listening') && <option value="listening">Listening</option>}
+                        {formData.skills.includes('reading') && <option value="reading">Reading</option>}
+                        {formData.skills.includes('writing') && <option value="writing">Writing</option>}
+                        {formData.skills.includes('speaking') && <option value="speaking">Speaking</option>}
+                        {!formData.skills.length && <option value="">Select skills first</option>}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Type</label>
+                      <select
+                        value={newQuestion.type}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-lg text-sm"
+                      >
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="true-false">True/False</option>
+                        <option value="fill-blank">Fill in Blank</option>
+                        <option value="short-answer">Short Answer</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-xs text-gray-600 mb-1">Question</label>
+                    <textarea
+                      value={newQuestion.question}
+                      onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                      rows={2}
+                      placeholder="Enter your question here..."
+                    />
+                  </div>
+                  
+                  {/* Options for multiple choice */}
+                  {newQuestion.type === 'multiple-choice' && (
+                    <div className="mb-3">
+                      <label className="block text-xs text-gray-600 mb-1">Options</label>
+                      {newQuestion.options.map((opt, i) => (
+                        <div key={i} className="flex gap-2 mb-2">
+                          <input
+                            type="radio"
+                            name="correct"
+                            checked={newQuestion.correctAnswer === opt.letter.toLowerCase()}
+                            onChange={() => setNewQuestion({ ...newQuestion, correctAnswer: opt.letter.toLowerCase() })}
+                            className="mt-2"
+                          />
+                          <input
+                            type="text"
+                            value={opt.text}
+                            onChange={(e) => updateOption(i, 'text', e.target.value)}
+                            placeholder={`Option ${opt.letter}`}
+                            className="flex-1 px-3 py-1 border rounded text-sm"
+                          />
+                        </div>
+                      ))}
+                      <button type="button" onClick={addOption} className="text-sm text-blue-600">+ Add Option</button>
+                    </div>
+                  )}
+                  
+                  <button
+                    type="button"
+                    onClick={addQuestion}
+                    disabled={!formData.skills.length}
+                    className="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                  >
+                    Add Question
+                  </button>
+                  {!formData.skills.length && <p className="text-xs text-red-500 mt-2">Please select skills first in Test Details tab</p>}
+                </div>
+                
+                {/* Questions List */}
+                {formData.skills.map(skill => (
+                  questions[skill]?.length > 0 && (
+                    <div key={skill} className="border rounded-lg p-3">
+                      <h4 className="font-semibold capitalize mb-2">{skill} ({questions[skill].length})</h4>
+                      {questions[skill].map((q, i) => (
+                        <div key={i} className="bg-white border rounded p-2 mb-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="font-medium">Q{i + 1}:</span>
+                            <button onClick={() => removeQuestion(skill, i)} className="text-red-500">×</button>
+                          </div>
+                          <p className="text-gray-700">{q.question}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ))}
+                
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('details')}
+                  className="w-full py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Back to Details
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
