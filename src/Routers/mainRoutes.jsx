@@ -34,6 +34,7 @@ import TestManagement from "../pages/admin/TestManagement";
 import UserManagement from "../pages/admin/UserManagement";
 import Analytics from "../pages/admin/Analytics";
 import ResourceManagement from "../pages/admin/ResourceManagement";
+import TipsManagement from "../pages/admin/TipsManagement";
 
 const mainRoutes = createBrowserRouter([
   {
@@ -174,6 +175,10 @@ const mainRoutes = createBrowserRouter([
           {
             path: "analytics",
             element: <Analytics />
+          },
+          {
+            path: "tips",
+            element: <TipsManagement />
           },
           {
             path: "reports",

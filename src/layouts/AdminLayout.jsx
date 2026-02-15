@@ -36,6 +36,7 @@ const AdminLayout = () => {
     { path: '/admin/users', label: 'User Management', icon: '👥' },
     { path: '/admin/audio', label: 'Audio Upload', icon: '🎵' },
     { path: '/admin/resources', label: 'Resource Upload', icon: '📁' },
+    { path: '/admin/tips', label: 'Tips Management', icon: '💡' },
     { path: '/admin/analytics', label: 'Result Analytics', icon: '📈' },
     { path: '/admin/reports', label: 'Performance Reports', icon: '📄' },
   ];
