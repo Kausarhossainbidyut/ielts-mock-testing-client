@@ -11,13 +11,20 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [dashboardRes] = await Promise.all([
-          adminAPI.getDashboard().catch(() => ({ data: null })),
-        ]);
+        const dashboardRes = await adminAPI.getDashboard().catch(() => ({ data: null }));
         
-        if (dashboardRes.data?.success) {
-          setStats(dashboardRes.data.data?.stats || []);
-          setRecentActivity(dashboardRes.data.data?.recentActivity || []);
+        if (dashboardRes?.data?.success) {
+          const data = dashboardRes.data.data;
+          const systemHealth = data.systemHealth || {};
+          
+          setStats([
+            { label: 'Total Users', value: systemHealth.totalUsers || 0, change: '+12%', icon: '👥', color: 'bg-blue-500' },
+            { label: 'Active Tests', value: systemHealth.totalTests || 0, change: '+5%', icon: '📝', color: 'bg-green-500' },
+            { label: 'Total Questions', value: systemHealth.totalQuestions || 0, change: '+8%', icon: '❓', color: 'bg-purple-500' },
+            { label: 'Resources', value: systemHealth.totalResources || 0, change: '+15%', icon: '📚', color: 'bg-orange-500' },
+          ]);
+          
+          setRecentActivity(data.recentActivity || []);
         }
       } catch (err) {
         console.error('Error fetching admin dashboard:', err);
