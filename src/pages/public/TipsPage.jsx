@@ -5,6 +5,7 @@ const TipsPage = () => {
   const [tips, setTips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [selectedTip, setSelectedTip] = useState(null);
 
   useEffect(() => {
     const fetchTips = async () => {
@@ -34,6 +35,12 @@ const TipsPage = () => {
   const filteredTips = filter === 'all' 
     ? tips 
     : tips.filter(t => t.category?.toLowerCase() === filter.toLowerCase());
+
+  const isContentLong = (content) => content && content.length > 120;
+
+  const handleReadMore = (tip) => {
+    setSelectedTip(tip);
+  };
 
   const categories = ['all', 'Reading', 'Listening', 'Writing', 'Speaking', 'General'];
 
@@ -79,7 +86,7 @@ const TipsPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTips.map(tip => (
-              <div key={tip._id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div key={tip._id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
                 <div className={`h-2 ${
                   tip.category === 'Reading' ? 'bg-blue-500' :
                   tip.category === 'Listening' ? 'bg-green-500' :
@@ -101,7 +108,21 @@ const TipsPage = () => {
                     <span className="text-xs text-gray-500">{tip.level}</span>
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-2">{tip.title}</h3>
-                  <p className="text-gray-600 text-sm">{tip.content}</p>
+                  <div className="text-gray-600 text-sm flex-1">
+                    {isContentLong(tip.content) ? (
+                      <>
+                        <span>{tip.content.substring(0, 120)}...</span>
+                        <button 
+                          onClick={() => handleReadMore(tip)}
+                          className="text-blue-600 hover:text-blue-800 font-medium ml-1"
+                        >
+                          Read more
+                        </button>
+                      </>
+                    ) : (
+                      <span>{tip.content}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -111,6 +132,55 @@ const TipsPage = () => {
         {!loading && filteredTips.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No tips found for this category.</p>
+          </div>
+        )}
+
+        {/* Read More Modal */}
+        {selectedTip && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedTip(null)}>
+            <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className={`h-2 rounded-t-xl mb-4 ${
+                selectedTip.category === 'Reading' ? 'bg-blue-500' :
+                selectedTip.category === 'Listening' ? 'bg-green-500' :
+                selectedTip.category === 'Writing' ? 'bg-orange-500' :
+                selectedTip.category === 'Speaking' ? 'bg-pink-500' :
+                'bg-purple-500'
+              }`}></div>
+              
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    selectedTip.category === 'Reading' ? 'bg-blue-100 text-blue-700' :
+                    selectedTip.category === 'Listening' ? 'bg-green-100 text-green-700' :
+                    selectedTip.category === 'Writing' ? 'bg-orange-100 text-orange-700' :
+                    selectedTip.category === 'Speaking' ? 'bg-pink-100 text-pink-700' :
+                    'bg-purple-100 text-purple-700'
+                  }`}>
+                    {selectedTip.category}
+                  </span>
+                  <span className="ml-2 text-xs text-gray-500">{selectedTip.level}</span>
+                </div>
+                <button 
+                  onClick={() => setSelectedTip(null)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{selectedTip.title}</h2>
+              
+              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{selectedTip.content}</p>
+              
+              <div className="mt-6 pt-4 border-t">
+                <button
+                  onClick={() => setSelectedTip(null)}
+                  className="w-full py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

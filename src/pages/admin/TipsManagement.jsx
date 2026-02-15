@@ -9,6 +9,8 @@ const TipsManagement = () => {
   const [filterCategory, setFilterCategory] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [editingTip, setEditingTip] = useState(null);
+  const [showTipModal, setShowTipModal] = useState(false); // For viewing full tip
+  const [selectedTip, setSelectedTip] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -115,6 +117,13 @@ const TipsManagement = () => {
     setFormData({ ...formData, keywords: formData.keywords.filter(k => k !== keyword) });
   };
 
+  const handleReadMore = (tip) => {
+    setSelectedTip(tip);
+    setShowTipModal(true);
+  };
+
+  const isContentLong = (content) => content && content.length > 150;
+
   const filteredTips = tips.filter(tip => {
     const matchesSearch = tip.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          tip.content?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -204,8 +213,8 @@ const TipsManagement = () => {
           </div>
         ) : (
           filteredTips.map((tip) => (
-            <div key={tip._id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="p-6">
+            <div key={tip._id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
+              <div className="p-6 flex-1">
                 <div className="flex justify-between items-start mb-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                     tip.category === 'listening' ? 'bg-blue-100 text-blue-700' :
@@ -232,7 +241,21 @@ const TipsManagement = () => {
                   </div>
                 </div>
                 <h3 className="font-bold text-lg text-gray-800 mb-2">{tip.title}</h3>
-                <p className="text-gray-600 text-sm line-clamp-3">{tip.content}</p>
+                <div className="text-gray-600 text-sm flex-1">
+                  {isContentLong(tip.content) ? (
+                    <>
+                      <span>{tip.content.substring(0, 150)}...</span>
+                      <button 
+                        onClick={() => handleReadMore(tip)}
+                        className="text-amber-600 hover:text-amber-800 font-medium ml-1"
+                      >
+                        Read more
+                      </button>
+                    </>
+                  ) : (
+                    <span>{tip.content}</span>
+                  )}
+                </div>
                 {tip.keywords?.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {tip.keywords.slice(0, 3).map((keyword, i) => (
@@ -375,6 +398,83 @@ const TipsManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Tip Modal */}
+      {showTipModal && selectedTip && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  selectedTip.category === 'listening' ? 'bg-blue-100 text-blue-700' :
+                  selectedTip.category === 'reading' ? 'bg-green-100 text-green-700' :
+                  selectedTip.category === 'writing' ? 'bg-purple-100 text-purple-700' :
+                  selectedTip.category === 'speaking' ? 'bg-pink-100 text-pink-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {selectedTip.category}
+                </span>
+                <span className={`ml-2 px-2 py-1 rounded text-xs ${
+                  selectedTip.difficulty === 'beginner' ? 'bg-green-100 text-green-700' : 
+                  selectedTip.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-700' : 
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {selectedTip.difficulty}
+                </span>
+              </div>
+              <button 
+                onClick={() => setShowTipModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">{selectedTip.title}</h2>
+            
+            <div className="prose max-w-none mb-6">
+              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{selectedTip.content}</p>
+            </div>
+            
+            {selectedTip.keywords?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedTip.keywords.map((keyword, i) => (
+                  <span key={i} className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            )}
+            
+            <div className="flex gap-3 pt-4 border-t">
+              <button
+                onClick={() => {
+                  setShowTipModal(false);
+                  handleEdit(selectedTip);
+                }}
+                className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Edit Tip
+              </button>
+              <button
+                onClick={() => {
+                  setShowTipModal(false);
+                  handleDelete(selectedTip._id);
+                }}
+                className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setShowTipModal(false)}
+                className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
