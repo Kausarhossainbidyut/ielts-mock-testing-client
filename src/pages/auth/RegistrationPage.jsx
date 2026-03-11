@@ -38,13 +38,27 @@ const RegistrationPage = () => {
         examDate
       };
       
+      console.log('📝 Registering user:', { ...userData, password: '***' });
       await createUser(userData);
+      console.log('✅ Registration successful!');
       
       form.reset();
       navigate('/login');
     } catch (error) {
-      console.error(error);
-      setError(error.response?.data?.message || error.message || 'Registration failed');
+      console.error('❌ Registration failed:', error);
+      console.error('Full error:', error.response?.data || error);
+      
+      // Show more specific error message
+      let errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+      
+      // Check for validation errors
+      if (error.errors) {
+        errorMessage = Object.values(error.errors)
+          .map(err => err.message)
+          .join(', ');
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

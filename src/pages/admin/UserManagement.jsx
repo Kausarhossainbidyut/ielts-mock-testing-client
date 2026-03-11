@@ -14,7 +14,7 @@ const UserManagement = () => {
     email: '',
     role: 'user',
     targetBand: 7.0,
-    currentLevel: 'intermediate'
+    currentLevel: 'beginner'
   });
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const UserManagement = () => {
       email: user.email || '',
       role: user.role || 'user',
       targetBand: user.targetBand || 7.0,
-      currentLevel: user.currentLevel || 'intermediate'
+      currentLevel: user.currentLevel || 'beginner'
     });
     setShowModal(true);
   };

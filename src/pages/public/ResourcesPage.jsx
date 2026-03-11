@@ -10,20 +10,22 @@ const ResourcesPage = () => {
     const fetchResources = async () => {
       try {
         setLoading(true);
+        console.log('📡 Fetching resources from API...');
         const res = await resourcesAPI.getAllResources();
+        console.log('✅ API Response:', res.data);
         if (res.data?.success) {
-          setResources(res.data.data?.resources || res.data.data || []);
+          const resourcesData = res.data.data?.resources || res.data.data || [];
+          console.log('📊 Resources received from database:', resourcesData.length, 'resources');
+          console.log('Sample resource:', resourcesData[0]);
+          setResources(resourcesData);
+        } else {
+          console.warn('⚠️ API returned success: false');
+          setResources([]);
         }
       } catch (err) {
-        console.error('Error fetching resources:', err);
-        setResources([
-          { _id: '1', title: 'IELTS Writing Vocabulary PDF', category: 'E-Book', type: 'PDF', size: '2.5 MB', downloads: 1250, description: 'Comprehensive vocabulary list for IELTS Writing task.' },
-          { _id: '2', title: 'Listening Practice Audio Files', category: 'Audio', type: 'MP3', size: '150 MB', downloads: 890, description: 'Collection of authentic IELTS listening practice materials.' },
-          { _id: '3', title: 'Sample Writing Essays Band 7-9', category: 'E-Book', type: 'PDF', size: '5 MB', downloads: 2100, description: 'Exemplary writing samples with examiner comments.' },
-          { _id: '4', title: 'Reading Passages Collection', category: 'Document', type: 'PDF', size: '8 MB', downloads: 750, description: 'Academic reading passages for practice.' },
-          { _id: '5', title: 'Speaking Cue Cards PDF', category: 'E-Book', type: 'PDF', size: '1.2 MB', downloads: 1800, description: 'Common IELTS Speaking cue cards with sample answers.' },
-          { _id: '6', title: 'Grammar for IELTS', category: 'E-Book', type: 'PDF', size: '3.5 MB', downloads: 1650, description: 'Essential grammar structures for IELTS.' },
-        ]);
+        console.error('❌ Error fetching resources:', err.message);
+        console.error('Full error:', err.response?.data || err);
+        setResources([]);
       } finally {
         setLoading(false);
       }

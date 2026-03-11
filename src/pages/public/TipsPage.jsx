@@ -11,20 +11,22 @@ const TipsPage = () => {
     const fetchTips = async () => {
       try {
         setLoading(true);
+        console.log('📡 Fetching tips from API...');
         const res = await tipsAPI.getAllTips();
+        console.log('✅ API Response:', res.data);
         if (res.data?.success) {
-          setTips(res.data.data?.tips || res.data.data || []);
+          const tipsData = res.data.data?.tips || res.data.data || [];
+          console.log('📊 Tips received from database:', tipsData.length, 'tips');
+          console.log('Sample tip:', tipsData[0]);
+          setTips(tipsData);
+        } else {
+          console.warn('⚠️ API returned success: false');
+          setTips([]);
         }
       } catch (err) {
-        console.error('Error fetching tips:', err);
-        setTips([
-          { _id: '1', title: 'Reading: Skimming and Scanning', category: 'Reading', content: 'Learn to skim for main ideas and scan for specific information. Practice timing yourself to complete reading sections within the allocated time.', level: 'All Levels' },
-          { _id: '2', title: 'Listening: Preview Before You Listen', category: 'Listening', content: 'Use the time before each section to preview the questions. This helps you know what information to listen for.', level: 'All Levels' },
-          { _id: '3', title: 'Writing Task 1: Data Description', category: 'Writing', content: 'Focus on key trends, comparisons, and significant changes. Don\'t describe every piece of data - select the most important features.', level: 'Intermediate' },
-          { _id: '4', title: 'Speaking: Part 2 Long Turn', category: 'Speaking', content: 'Use the 1-minute preparation time to structure your talk. Include introduction, main points with examples, and a conclusion.', level: 'All Levels' },
-          { _id: '5', title: 'Time Management Tips', category: 'General', content: 'Practice with timed tests regularly. Allocate time per question and don\'t spend too long on any single question.', level: 'All Levels' },
-          { _id: '6', title: 'Vocabulary for Academic Writing', category: 'Writing', content: 'Build your academic vocabulary. Use synonyms and paraphrasing to demonstrate range, but avoid overly complex words used incorrectly.', level: 'Advanced' },
-        ]);
+        console.error('❌ Error fetching tips:', err.message);
+        console.error('Full error:', err.response?.data || err);
+        setTips([]);
       } finally {
         setLoading(false);
       }

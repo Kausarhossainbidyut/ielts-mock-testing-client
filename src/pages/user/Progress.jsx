@@ -10,11 +10,15 @@ const Progress = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log('📡 Fetching analytics and results...');
         
         const [analyticsRes, resultsRes] = await Promise.all([
           userAPI.getAnalytics().catch(() => ({ data: null })),
           resultsAPI.getMyResults().catch(() => ({ data: null }))
         ]);
+        
+        console.log('✅ Analytics response:', analyticsRes.data);
+        console.log('✅ Results response:', resultsRes.data);
         
         if (analyticsRes.data?.success) {
           setProgressData(analyticsRes.data.data?.skills || []);
@@ -27,18 +31,12 @@ const Progress = () => {
             day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i % 7],
             score: r.overall || r.bandScore || 0
           }));
-          setWeeklyProgress(last7Days.length ? last7Days : [
-            { day: 'Mon', score: 6.5 },
-            { day: 'Tue', score: 7.0 },
-            { day: 'Wed', score: 6.8 },
-            { day: 'Thu', score: 7.2 },
-            { day: 'Fri', score: 7.5 },
-            { day: 'Sat', score: 7.0 },
-            { day: 'Sun', score: 7.8 },
-          ]);
+          setWeeklyProgress(last7Days);
+          console.log('📊 Weekly progress:', last7Days.length, 'items');
         }
       } catch (err) {
-        console.error('Error fetching progress:', err);
+        console.error('❌ Error fetching progress:', err.message);
+        console.error('Full error:', err.response?.data || err);
       } finally {
         setLoading(false);
       }
@@ -47,26 +45,8 @@ const Progress = () => {
     fetchData();
   }, []);
 
-  // Fallback data
-  const fallbackSkills = [
-    { skill: 'Listening', current: 78, previous: 72, trend: 'up' },
-    { skill: 'Reading', current: 73, previous: 68, trend: 'up' },
-    { skill: 'Writing', current: 68, previous: 65, trend: 'up' },
-    { skill: 'Speaking', current: 70, previous: 70, trend: 'stable' },
-  ];
-
-  const fallbackWeekly = [
-    { day: 'Mon', score: 6.5 },
-    { day: 'Tue', score: 7.0 },
-    { day: 'Wed', score: 6.8 },
-    { day: 'Thu', score: 7.2 },
-    { day: 'Fri', score: 7.5 },
-    { day: 'Sat', score: 7.0 },
-    { day: 'Sun', score: 7.8 },
-  ];
-
-  const skillsData = progressData.length ? progressData : fallbackSkills;
-  const weeklyData = weeklyProgress.length ? weeklyProgress : fallbackWeekly;
+  const skillsData = progressData;
+  const weeklyData = weeklyProgress;
   const maxScore = 9;
 
   if (loading) {
@@ -98,57 +78,73 @@ const Progress = () => {
       </div>
 
       {/* Skill Progress Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {skillsData.map((skill, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">{skill.skill}</h3>
-              <span className={`text-2xl ${skill.trend === 'up' ? 'text-green-500' : skill.trend === 'down' ? 'text-red-500' : 'text-gray-400'}`}>
-                {skill.trend === 'up' ? '↑' : skill.trend === 'down' ? '↓' : '→'}
-              </span>
-            </div>
-            <div className="relative pt-1">
-              <div className="flex mb-2 items-center justify-between">
-                <div>
-                  <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
-                    Current: {skill.current}%
-                  </span>
+      {skillsData.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {skillsData.map((skill, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">{skill.skill}</h3>
+                <span className={`text-2xl ${skill.trend === 'up' ? 'text-green-500' : skill.trend === 'down' ? 'text-red-500' : 'text-gray-400'}`}>
+                  {skill.trend === 'up' ? '↑' : skill.trend === 'down' ? '↓' : '→'}
+                </span>
+              </div>
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <div>
+                    <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
+                      Current: {skill.current}%
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-semibold inline-block text-gray-600">
+                      Previous: {skill.previous}%
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs font-semibold inline-block text-gray-600">
-                    Previous: {skill.previous}%
-                  </span>
+                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                  <div style={{ width: `${skill.current}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-blue-500 to-indigo-600"></div>
                 </div>
               </div>
-              <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                <div style={{ width: `${skill.current}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+              <div className="text-center">
+                <span className="text-3xl font-bold text-gray-800">Band {Math.round(skill.current / 10 * 9) / 9 + 4}</span>
               </div>
-            </div>
-            <div className="text-center">
-              <span className="text-3xl font-bold text-gray-800">Band {Math.round(skill.current / 10 * 9) / 9 + 4}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Weekly Progress Chart */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">Weekly Performance</h2>
-        <div className="flex items-end justify-between h-64 gap-4">
-          {weeklyData.map((day, index) => (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div className="relative w-full flex items-end justify-center" style={{ height: '200px' }}>
-                <div 
-                  className="w-full bg-gradient-to-t from-blue-500 to-indigo-500 rounded-t-lg transition-all duration-500 hover:from-blue-600 hover:to-indigo-600"
-                  style={{ height: `${(day.score / maxScore) * 100}%` }}
-                ></div>
-                <span className="absolute -top-8 text-sm font-medium text-gray-600">{day.score}</span>
-              </div>
-              <span className="mt-3 text-sm font-medium text-gray-500">{day.day}</span>
             </div>
           ))}
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Progress Data Yet</h3>
+          <p className="text-gray-600">Complete some tests to see your skill-wise progress analysis</p>
+        </div>
+      )}
+
+      {/* Weekly Progress Chart */}
+      {weeklyData.length > 0 ? (
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-6">Weekly Performance</h2>
+          <div className="flex items-end justify-between h-64 gap-4">
+            {weeklyData.map((day, index) => (
+              <div key={index} className="flex-1 flex flex-col items-center">
+                <div className="relative w-full flex items-end justify-center" style={{ height: '200px' }}>
+                  <div 
+                    className="w-full bg-gradient-to-t from-blue-500 to-indigo-500 rounded-t-lg transition-all duration-500 hover:from-blue-600 hover:to-indigo-600"
+                    style={{ height: `${(day.score / maxScore) * 100}%` }}
+                  ></div>
+                  <span className="absolute -top-8 text-sm font-medium text-gray-600">{day.score}</span>
+                </div>
+                <span className="mt-3 text-sm font-medium text-gray-500">{day.day}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+          <div className="text-6xl mb-4">📈</div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Weekly Data</h3>
+          <p className="text-gray-600">Take tests regularly to track your weekly performance</p>
+        </div>
+      )}
 
       {/* Achievements */}
       <div className="bg-white rounded-xl shadow-lg p-6">

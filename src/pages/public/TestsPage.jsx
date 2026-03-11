@@ -13,19 +13,22 @@ const TestsPage = ({ filter: filterProp }) => {
     const fetchTests = async () => {
       try {
         setLoading(true);
+        console.log('📡 Fetching tests from API...');
         const res = await testsAPI.getAllTests();
+        console.log('✅ API Response:', res.data);
         if (res.data?.success) {
-          setTests(res.data.data?.tests || res.data.data || []);
+          const testsData = res.data.data?.tests || res.data.data || [];
+          console.log('📊 Tests received from database:', testsData.length, 'tests');
+          console.log('Sample test:', testsData[0]);
+          setTests(testsData);
+        } else {
+          console.warn('⚠️ API returned success: false');
+          setTests([]);
         }
       } catch (err) {
-        console.error('Error fetching tests:', err);
-        setTests([
-          { _id: '1', title: 'IELTS Academic Reading Practice Test', type: 'Reading', questionCount: 40, duration: 60, difficulty: 'Medium', description: 'Practice your reading skills with authentic IELTS Academic texts.' },
-          { _id: '2', title: 'IELTS Listening Practice Test', type: 'Listening', questionCount: 40, duration: 30, difficulty: 'Medium', description: 'Improve your listening skills with various accents and audio materials.' },
-          { _id: '3', title: 'IELTS Writing Task 1 & 2', type: 'Writing', questionCount: 2, duration: 60, difficulty: 'Hard', description: 'Master both Task 1 (Report) and Task 2 (Essay) writing.' },
-          { _id: '4', title: 'IELTS Speaking Practice', type: 'Speaking', questionCount: 3, duration: 15, difficulty: 'Medium', description: 'Practice all three parts of the IELTS Speaking test.' },
-          { _id: '5', title: 'Full IELTS Mock Test', type: 'Full Test', questionCount: 80, duration: 175, difficulty: 'Hard', description: 'Complete mock test covering all four modules.' },
-        ]);
+        console.error('❌ Error fetching tests:', err.message);
+        console.error('Full error:', err.response?.data || err);
+        setTests([]);
       } finally {
         setLoading(false);
       }

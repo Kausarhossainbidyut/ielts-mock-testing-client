@@ -11,23 +11,31 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log('📡 Fetching admin dashboard data...');
         const dashboardRes = await adminAPI.getDashboard().catch(() => ({ data: null }));
+        
+        console.log('✅ Dashboard response:', dashboardRes.data);
         
         if (dashboardRes?.data?.success) {
           const data = dashboardRes.data.data;
           const systemHealth = data.systemHealth || {};
           
+          console.log('📊 System Health:', systemHealth);
+          
           setStats([
             { label: 'Total Users', value: systemHealth.totalUsers || 0, change: '+12%', icon: '👥', color: 'bg-blue-500' },
-            { label: 'Active Tests', value: systemHealth.totalTests || 0, change: '+5%', icon: '📝', color: 'bg-green-500' },
+            { label: 'Active Tests', value: systemHealth.activeTests || systemHealth.totalTests || 0, change: '+5%', icon: '📝', color: 'bg-green-500' },
             { label: 'Total Questions', value: systemHealth.totalQuestions || 0, change: '+8%', icon: '❓', color: 'bg-purple-500' },
             { label: 'Resources', value: systemHealth.totalResources || 0, change: '+15%', icon: '📚', color: 'bg-orange-500' },
           ]);
           
+          // Handle recent activity - may be empty if no analytics data
           setRecentActivity(data.recentActivity || []);
+          console.log('💡 Recent activity:', data.recentActivity?.length || 0, 'items');
         }
       } catch (err) {
-        console.error('Error fetching admin dashboard:', err);
+        console.error('❌ Error fetching admin dashboard:', err.message);
+        console.error('Full error:', err.response?.data || err);
       } finally {
         setLoading(false);
       }
@@ -35,32 +43,6 @@ const AdminDashboard = () => {
     
     fetchData();
   }, []);
-
-  // Fallback data
-  const fallbackStats = [
-    { label: 'Total Users', value: '2,547', change: '+12%', icon: '👥', color: 'bg-blue-500' },
-    { label: 'Active Tests', value: '156', change: '+5%', icon: '📝', color: 'bg-green-500' },
-    { label: 'Total Questions', value: '4,832', change: '+8%', icon: '❓', color: 'bg-purple-500' },
-    { label: 'Test Submissions', value: '12,450', change: '+15%', icon: '📊', color: 'bg-orange-500' },
-  ];
-
-  const fallbackActivity = [
-    { user: 'John Doe', action: 'Completed Test', test: 'IELTS Reading Practice', time: '2 mins ago' },
-    { user: 'Sarah Smith', action: 'Registered', test: 'New Account', time: '15 mins ago' },
-    { user: 'Mike Johnson', action: 'Submitted Writing', test: 'Task 2 Essay', time: '30 mins ago' },
-    { user: 'Emily Brown', action: 'Completed Test', test: 'Listening Module', time: '1 hour ago' },
-  ];
-
-  const statsData = stats.length ? stats : fallbackStats;
-  const activityData = recentActivity.length ? recentActivity : fallbackActivity;
-
-  // Fallback top tests
-  const topTests = [
-    { name: 'IELTS Academic Reading', attempts: 1250, avgScore: 6.8 },
-    { name: 'IELTS Listening Practice', attempts: 1100, avgScore: 7.2 },
-    { name: 'Writing Task 2', attempts: 980, avgScore: 6.5 },
-    { name: 'Speaking Part 1', attempts: 850, avgScore: 7.0 },
-  ];
 
   if (loading) {
     return (
@@ -92,7 +74,7 @@ const AdminDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsData.map((stat, index) => (
+        {stats.map((stat, index) => (
           <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div className={`w-14 h-14 ${stat.color} rounded-xl flex items-center justify-center text-2xl`}>
@@ -136,41 +118,31 @@ const AdminDashboard = () => {
             <h2 className="text-xl font-bold text-gray-800">Recent Activity</h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {activityData.map((activity, index) => (
-              <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-800">{activity.user}</div>
-                    <div className="text-sm text-gray-500">{activity.action} • {activity.test}</div>
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-800">{activity.user?.name || 'User'}</div>
+                      <div className="text-sm text-gray-500">{activity.action} • {activity.test || activity.details}</div>
+                    </div>
+                    <span className="text-sm text-gray-400">
+                      {new Date(activity.createdAt).toLocaleString()}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-400">{activity.time}</span>
                 </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                <div className="text-4xl mb-2">📊</div>
+                <p>No recent activity data available</p>
+                <p className="text-sm mt-1">Activity will appear here as users interact with the platform</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
-        {/* Top Tests */}
-        <div className="bg-white rounded-xl shadow-lg">
-          <div className="p-5 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">Most Popular Tests</h2>
-          </div>
-          <div className="divide-y divide-gray-200">
-            {topTests.map((test, index) => (
-              <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-800">{test.name}</div>
-                    <div className="text-sm text-gray-500">{test.attempts.toLocaleString()} attempts</div>
-                  </div>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                    Avg: {test.avgScore}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Top Tests - Removed because data not available */}
       </div>
     </div>
   );

@@ -27,13 +27,6 @@ const MyTests = () => {
         }
       } catch (err) {
         console.error('Error fetching tests:', err);
-        // Use fallback data if API fails
-        setTests([
-          { _id: '1', title: 'IELTS Academic Reading Practice', type: 'Reading', questions: 40, time: 60, status: 'active', date: '2026-02-10' },
-          { _id: '2', title: 'IELTS General Training Test', type: 'Writing', questions: 2, time: 60, status: 'active', date: '2026-02-12' },
-          { _id: '3', title: 'IELTS Listening Module', type: 'Listening', questions: 40, time: 30, status: 'active', date: '2026-02-08' },
-          { _id: '4', title: 'IELTS Speaking Part 2', type: 'Speaking', questions: 3, time: 15, status: 'active', date: '2026-02-14' },
-        ]);
       } finally {
         setLoading(false);
       }
@@ -42,8 +35,7 @@ const MyTests = () => {
     fetchData();
   }, []);
 
-  // Fallback stats if API fails
-  const statsData = stats || { totalTests: 24, completedTests: 18, inProgressTests: 4, averageBand: 7.0 };
+  const statsData = stats;
 
   if (loading) {
     return (

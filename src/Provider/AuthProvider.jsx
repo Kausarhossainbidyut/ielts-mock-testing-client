@@ -20,14 +20,33 @@ const AuthProvider = ({ children }) => {
   const createUser = async (userData) => {
     try {
       setError(null);
+      console.log('📡 Sending registration request...');
       const res = await axios.post(`${API_URL}/auth/register`, userData, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
+      console.log('✅ Registration response:', res.data);
       if (res.data.success) setUser(res.data.user);
       return res.data;
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message || 'Registration failed';
+      console.error('❌ Registration failed:', err.message);
+      console.error('Error details:', err.response?.data);
+      
+      // Extract detailed error messages
+      let errorMsg = 'Registration failed';
+      
+      if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      }
+      
+      // Handle mongoose validation errors
+      if (err.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        errorMsg = Object.values(errors)
+          .map(e => e.message || e.name)
+          .join(', ');
+      }
+      
       setError(errorMsg);
       throw err.response?.data || err;
     }
@@ -54,7 +73,11 @@ const AuthProvider = ({ children }) => {
       const res = await axios.get(`${API_URL}/auth/me`, { withCredentials: true });
       if (res.data.success) setUser(res.data.user);
       return res.data.user;
-    } catch {
+    } catch (err) {
+      // 401 is expected when not logged in - suppress error log
+      if (err.response?.status !== 401) {
+        console.error('Auth check error:', err.message);
+      }
       setUser(null);
     }
   };

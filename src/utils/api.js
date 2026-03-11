@@ -11,6 +11,18 @@ const api = axios.create({
   },
 });
 
+// Add request interceptor for logging
+api.interceptors.request.use(
+  config => {
+    console.log('🌐 API Request:', config.method.toUpperCase(), config.url);
+    return config;
+  },
+  error => {
+    console.error('❌ API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
 // Auth APIs
 export const authAPI = {
   login: (email, password) => api.post("/auth/login", { email, password }),
